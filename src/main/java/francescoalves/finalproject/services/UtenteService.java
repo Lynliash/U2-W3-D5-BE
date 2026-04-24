@@ -1,5 +1,6 @@
 package francescoalves.finalproject.services;
 
+import francescoalves.finalproject.entities.Ruolo;
 import francescoalves.finalproject.entities.Utente;
 import francescoalves.finalproject.exceptions.BadRequestException;
 import francescoalves.finalproject.exceptions.NotFoundException;
@@ -23,18 +24,25 @@ public class UtenteService {
         this.utentiRepo.findByEmail(body.email()).ifPresent(utente -> {
             throw new BadRequestException("l'email " + body.email() + " è già in uso");
         });
+
         Utente nuovoUtente = new Utente();
         nuovoUtente.setUsername(body.username());
         nuovoUtente.setEmail(body.email());
         nuovoUtente.setPassword(bcrypt.encode(body.password()));
-        return utentiRepo.save(nuovoUtente);
+
+        if (body.ruolo() == null) {
+            nuovoUtente.setRuolo(Ruolo.UTENTE_NORMALE);
+        } else {
+            try {
+                nuovoUtente.setRuolo(Ruolo.valueOf(body.ruolo().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("ruolo non valido! Usa UTENTE_NORMALE o ORGANIZZATORE_EVENTI");
+            }
+        }
+        return this.utentiRepo.save(nuovoUtente);
     }
 
     public Utente findById(UUID id) {
-        return utentiRepo.findById(id).orElseThrow(() -> new NotFoundException(id.toString()));
-    }
-
-    public Utente findByEmail(String email) {
-        return utentiRepo.findByEmail(email).orElseThrow(() -> new NotFoundException("utente con email " + email + " non trovato"));
+        return this.utentiRepo.findById(id).orElseThrow(() -> new NotFoundException("utente non trovato"));
     }
 }
