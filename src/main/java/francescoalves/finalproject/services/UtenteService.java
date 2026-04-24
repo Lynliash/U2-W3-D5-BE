@@ -1,5 +1,6 @@
 package francescoalves.finalproject.services;
 
+import francescoalves.finalproject.entities.Ruolo;
 import francescoalves.finalproject.entities.Utente;
 import francescoalves.finalproject.exceptions.BadRequestException;
 import francescoalves.finalproject.exceptions.NotFoundException;
@@ -20,13 +21,21 @@ public class UtenteService {
     private PasswordEncoder bcrypt;
 
     public Utente save(UtenteDTO body) {
-        this.utentiRepo.findByEmail(body.email()).ifPresent(utente -> {
-            throw new BadRequestException("l'email " + body.email() + " è già in uso");
-        });
+
         Utente nuovoUtente = new Utente();
         nuovoUtente.setUsername(body.username());
         nuovoUtente.setEmail(body.email());
         nuovoUtente.setPassword(bcrypt.encode(body.password()));
+        if (body.ruolo() == null || body.ruolo().isBlank()) {
+            nuovoUtente.setRuolo(Ruolo.UTENTE_NORMALE);
+        } else {
+            try {
+                nuovoUtente.setRuolo(Ruolo.valueOf(body.ruolo().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("ruolo non valido");
+            }
+        }
+
         return utentiRepo.save(nuovoUtente);
     }
 
