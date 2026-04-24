@@ -29,4 +29,5 @@ public class PrenotazioniController {
             @PathVariable UUID eventoId) {
         return this.prenotazioniService.prenota(currentUtente, eventiService.findById(eventoId));
     }
+
 }
