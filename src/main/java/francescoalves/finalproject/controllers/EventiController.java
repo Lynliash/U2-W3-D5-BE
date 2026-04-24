@@ -1,9 +1,11 @@
 package francescoalves.finalproject.controllers;
 
 import francescoalves.finalproject.entities.Evento;
+import francescoalves.finalproject.entities.Utente;
 import francescoalves.finalproject.services.EventiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +24,8 @@ public class EventiController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('ORGANIZZATORE_EVENTI')")
-    public Evento save(@RequestBody Evento body) {
+    public Evento save(@RequestBody Evento body, @AuthenticationPrincipal Utente organizzatore) {
+        body.setOrganizzatore(organizzatore);
         return this.eventiService.save(body);
     }
 }
